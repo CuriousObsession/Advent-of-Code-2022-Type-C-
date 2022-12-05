@@ -47,6 +47,15 @@ char stack_pop(struct stack_node** stack) {
     }
 }
 
+char stack_peek(struct stack_node* stack) {
+     if (stack_isEmpty(stack)) {
+        printf("stack_pop errorr: stack is empty.\n");
+        return -1;
+    } else {
+        char res = (stack)->val;
+        return res;
+    }
+}
 
 
 int main()
@@ -58,8 +67,6 @@ int main()
     }
 
     char line[LINE_LENGTH];
-    int result1 = 0;
-    int result2 = 0;
     char delim[] = " []";
     char *ptr;
 
@@ -85,26 +92,33 @@ int main()
     //Make the stacks
     rewind(file);
     struct stack_node **stacks = malloc(count * sizeof(struct stack_node *));
+    struct stack_node **stacks_2 = malloc(count * sizeof(struct stack_node *));
     char **data = malloc(base * sizeof(char *));
     int i;
     int j;
+    char *temp_str;
+    char temp_char;
     for (i=0; i < base; i++) {
         fgets(line, LINE_LENGTH, file);
         data[i] = (char *) malloc(LINE_LENGTH+1);
+        memset(data[i], 0, LINE_LENGTH+1);
         strcpy(data[i], line);
-        printf("%c", data[i][1]);
     }
     for (j=0; j < count; j++) {
         stacks[j] = NULL;
+        stacks_2[j] = NULL;
     }
     for (i=0; i < base; i++) {
         for (j=0; j < count; j++) {
-            if (isalpha(data[base-1-i][1 + (j*4) ])) {
+            temp_str = data[base-1-i];
+            temp_char = temp_str[1 + (j*4) ];
+            if (isalpha(temp_char)) {
                 if (stack_isEmpty(stacks[j])) {
-                    stacks[j] = stack_make(data[base-1-i][1+(j*4)]); 
-                    //printf("%c", stacks[j]->val);
+                    stacks[j] = stack_make(temp_char); 
+                    stacks_2[j] = stack_make(temp_char);
                 } else {
-                    stack_push(data[base-1-i][1+(j*4)], &stacks[j]);
+                    stack_push(temp_char, &stacks[j]);
+                    stack_push(temp_char, &stacks_2[j]);
                 }
                 
             }
@@ -120,7 +134,9 @@ int main()
     int num_move;
     int num_from;
     int num_to;
-    char mover;
+    char mover_1;
+    char mover_2;
+    struct stack_node *temp;
     int k;
     while (fgets(line, LINE_LENGTH, file)) {
         ptr = strtok(line, move_delim);
@@ -130,22 +146,43 @@ int main()
         ptr = strtok(NULL, move_delim);
         num_to = atoi(ptr);
         for (k=0; k<num_move; k++) {
-            mover = stack_pop(&stacks[num_from-1]);
-            stack_push(mover, &stacks[num_to-1]);
+            mover_1 = stack_pop(&stacks[num_from-1]);
+            mover_2 = stack_pop(&stacks_2[num_from-1]);
+            if (k == 0) {
+                temp = stack_make(mover_2);
+            } else {
+                stack_push(mover_2, &temp);
+            }
+            stack_push(mover_1, &stacks[num_to-1]);
+        }
+        for (k=0; k<num_move; k++) {
+            mover_2 = stack_pop(&temp);
+            stack_push(mover_2, &stacks_2[num_to-1]);
         }
     }
 
 
     // Release everything and end
+    char result1[count+1];
+    char result2[count+1];
+    result1[count]='\0';
+    result2[count]='\0';
     for (j=0; j < count; j++) {
-        printf("%c", stacks[j]->val);
+        temp = stacks[j];
+        result1[j] = stack_peek(temp);
+        temp = stacks_2[j];
+        result2[j] = stack_peek(temp);
         free(stacks[j]);
+        free(stacks_2[j]);
     }
+    printf("For part 1, the top crates in each stack spell the code %s. \n",result1);
+    printf("For part 2, the top crates in each stack spell the code %s. \n",result2);
     for (i=0; i < base; i++) {
         free(data[i]);
     }
     free(data);
     free(stacks);
+    free(stacks_2);
     fclose(file);
     return 0;
 }
