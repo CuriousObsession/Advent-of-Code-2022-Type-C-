@@ -36,8 +36,8 @@ void stack_push(char val, struct stack_node** stack) {
 
 char stack_pop(struct stack_node** stack) {
     if (stack_isEmpty(*stack)) {
-        printf("stack_pop errorr: stack is empty.\n");
-        return -1;
+        printf("stack_pop error: stack is empty.\n");
+        return '_';
     } else {
         char res = (*stack)->val;
         struct stack_node *ptr = *stack;
@@ -49,8 +49,8 @@ char stack_pop(struct stack_node** stack) {
 
 char stack_peek(struct stack_node* stack) {
      if (stack_isEmpty(stack)) {
-        printf("stack_pop errorr: stack is empty.\n");
-        return -1;
+        printf("stack_peek error: stack is empty.\n");
+        return '_';
     } else {
         char res = (stack)->val;
         return res;
@@ -170,13 +170,19 @@ int main()
     for (j=0; j < count; j++) {
         temp = stacks[j];
         result1[j] = stack_peek(temp);
+        while (!stack_isEmpty(stacks[j])) {
+            stack_pop(&stacks[j]);
+        }
+        free(stacks[j]);
         temp = stacks_2[j];
         result2[j] = stack_peek(temp);
-        free(stacks[j]);
-        free(stacks_2[j]);
+        while (!stack_isEmpty(stacks_2[j])) {
+            stack_pop(&stacks_2[j]);
+        }
+        free(stacks_2[j]);      
     }
-    printf("For part 1, the top crates in each stack spell the code %s. \n",result1);
-    printf("For part 2, the top crates in each stack spell the code %s. \n",result2);
+    printf("For part 1, the top crates in each stack spell the code %s. \n", result1);
+    printf("For part 2, the top crates in each stack spell the code %s. \n", result2);
     for (i=0; i < base; i++) {
         free(data[i]);
     }
