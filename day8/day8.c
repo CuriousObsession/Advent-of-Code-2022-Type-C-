@@ -47,17 +47,19 @@ int main()
     int top_record;
     int visible;
     int position;
-    int top_position;
-    Smart_tree* tree;
+    int pos_above;
+    int pos_left;
     Smart_tree* above;
+    Smart_tree* to_left;
 
     while (fgets(line, LINE_LENGTH, file)) {
         for (col=0; col< width; col++) {
             position = (row * width) + col;
             tree_num = line[col] - '0';
-            
-            top_position = ((row-1) * width) + col;
-            above = row == 0 ? NULL : trees[top_position];
+            pos_above = ((row-1) * width) + col;
+            pos_left = (row * width) + col - 1;
+            above = row == 0 ? NULL : trees[pos_above];
+            to_left = col == 0 ? NULL : trees[pos_left];
             visible = 0;
             if (row==0 || tree_num > above->top) {
                 visible = 1;
@@ -72,33 +74,26 @@ int main()
                 left_record = tree_num;
             }
             trees[position] = make_tree(tree_num, visible, top_record, left_record, -1, -1);
-            tree = trees[position];
-            printf("%i,%i\n",position, tree);
         } 
-        if (row+1 >= r_capacity) {
-            r_capacity = r_capacity * 2;
-            Smart_tree** new_trees = (Smart_tree**) realloc(trees, r_capacity * width);
-            trees = new_trees;
-        }
         row += 1; 
     }
 
     printf("There are %i visible trees.\n", num_visible);
     int height = row;
-    int right_record;
     Smart_tree* below;
     Smart_tree* to_right;
+    Smart_tree* tree;
+    int row2;
     
-    for (row = height-1; row >= 0 ; row--) {
+    for (row2 = height-1; row2 >= 0 ; row2--) {
         for (col = width-1; col >= 0; col --) {
-            position = (row * width) + col;
-            int pos_below = ((row+1) * width) + col;
-            int pos_right = (row * width) + col + 1;
-            tree = trees[22];
-            printf("%i,%i\n",position, tree);
-            below = row == (height-1) ? NULL : trees[pos_below];
+            position = (row2 * width) + col;
+            int pos_below = ((row2+1) * width) + col;
+            int pos_right = (row2 * width) + col + 1;
+            tree = trees[position];
+            below = row2 == (height-1) ? NULL : trees[pos_below];
             to_right = col == (width-1) ? NULL : trees[pos_right];
-            if (row == (height-1) || tree->height > below->bot) {
+            if (row2 == (height-1) || tree->height > below->bot) {
                 tree->bot = tree->height;
                 if (tree->visible == 0) {
                     num_visible++;
@@ -119,5 +114,61 @@ int main()
         }
     }
     printf("There are %i visible trees.\n", num_visible);
+
+    int i;
+    int winner = 0;
+    int tree_score[4];
+    int f_score;
+    for (row = 0; row<height; row++) {
+        for (col = 0; col<width; col++) {
+            position = (row * width) + col;
+            tree = trees[position];
+            for (i=0; i<4; i++) {
+                tree_score[i] = 0;
+            }
+            for (i=col-1; i>= 0; i--) {
+                if ((trees[(row * width) + i])->height < tree->height) {
+                    tree_score[0]++;
+                    continue;
+                }
+                tree_score[0]++;
+                break;
+            }
+            for (i=col+1; i<width; i++) {
+                if ((trees[(row * width) + i])->height < tree->height) {
+                    tree_score[1]++;
+                    continue;
+                }
+                tree_score[1]++;
+                break;
+            }
+            for (i=row-1; i>= 0; i--) {
+                if ((trees[(i * width) + col])->height < tree->height) {
+                    tree_score[2]++;
+                    continue;
+                }
+                tree_score[2]++;
+                break;
+            }
+            for (i=row+1; i<height; i++) {
+                if ((trees[(i * width) + col])->height < tree->height) {
+                    tree_score[3]++;
+                    continue;
+                }
+                tree_score[3]++;
+                break;
+            }
+            f_score = tree_score[0] * tree_score[1] * tree_score[2] * tree_score[3];
+            winner = f_score > winner ? f_score : winner;
+        }
+    }   
+    printf("The highest scenic score possible is %i\n", winner); 
     return 0;
 }
+
+
+
+
+
+
+
