@@ -127,7 +127,6 @@ void dir_compute_winner(struct dir** directory, struct dir** winner, int goal) {
     }
 }
 
-
 int main()
 {
     FILE *file = fopen("input.txt", "r");
@@ -135,7 +134,6 @@ int main()
         printf("Could not open file. \n");
         return 1;
     }
-
     char line[LINE_LENGTH];
     char delim[] = " \n";
     char *ptr;
@@ -149,57 +147,47 @@ int main()
     int flag;
 
     while (fgets(line, LINE_LENGTH, file)) {
-        ptr = strtok(line, delim);
-        
+        ptr = strtok(line, delim);        
         if (!strcmp(ptr,"$")){
             are_listing = 0;
-            command = strtok(NULL, delim);
-            
+            command = strtok(NULL, delim);        
             if (!strcmp(command,"ls")) {
-                are_listing = 1;
-            
+                are_listing = 1;    
             } else if (!strcmp(command,"cd")) {
-                new_dir = strtok(NULL, delim);
-                
+                new_dir = strtok(NULL, delim);     
                 if (!strcmp(new_dir,"/")) {
-                    current_dir = top_dir;
-                
+                    current_dir = top_dir;        
                 } else if (!strcmp(new_dir,"..")) {
                     if (current_dir->parent) {
                         current_dir = current_dir->parent;
                     } else {
                         current_dir = top_dir;
-                    }
-                
+                    }        
                 } else {
                     flag = dir_move_to_child(&current_dir, new_dir);
                     if (flag == 0) {                    
                         printf("Error: Directory %s is not a child of %s. Disregard and continue.\n", new_dir, current_dir->name);
                     }
-                }
-            
+                }         
             } else {
                 printf("Error: Command %s not recognized.\n", command);
                 return 1;
             }
-
         } else if (are_listing && !strcmp(ptr,"dir")) {
             name = strtok(NULL, delim);
             if (!dir_is_child(current_dir,name)) {
                 struct dir* new_dir = dir_make(name, current_dir);
                 dir_add_child(&current_dir, &new_dir);
             }
-
         } else if (are_listing && is_numeric(ptr)) {
             dir_add_size(&current_dir, atoi(ptr));
-
         } else {
             printf("Error: Input text is not appropriately formatted: first token in line is %s and listing is %i.\n", ptr, are_listing);
             return 1;
         }
         //printf("%s, %i, %s, %i, %i\n", line, are_listing, current_dir->name, current_dir->size, current_dir->num_children);
     }
-
+    
     dir_compute_valid_size(&top_dir);
     printf("The sum of the total sizes of directories of small size is %i.\n", top_dir->valid_size);
     int goal = top_dir->total_size + UPDATE - TOTAL;
@@ -210,11 +198,3 @@ int main()
     }
     return 0;
 }
-
-
-
-
-
-
-
-
