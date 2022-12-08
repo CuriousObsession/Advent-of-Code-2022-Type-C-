@@ -1,6 +1,6 @@
 $ cd /
 $ ls
-dir btsgrbd
+dir **
 3868 cprq.fmm
 dir gcbpcf
 dir hfm
